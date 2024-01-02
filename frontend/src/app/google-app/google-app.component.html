@@ -1,0 +1,30 @@
+<p>google-app works!</p>
+
+<div>
+  <google-map height="600px" width="100%" [center]="center" [zoom]="zoom" [options]="googleMapOptions">
+    @for (position of markerPositions; track position) {
+    <map-marker [position]="position" [options]="markerOptions" />
+    }
+  </google-map>
+</div>
+
+<form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+
+  <label for="longitude">Longitude: </label>
+  <input id="longitude" type="number" min="-180.0" max="180.0" formControlName="longitude">
+
+  <label for="latitude">Latitude: </label>
+  <input id="latitude" type="number" min="-90.0" max="90.0" formControlName="latitude">
+
+  <label for="radius">Radius: </label>
+  <input id="radius" type="number" min="1.0" max="500.0" formControlName="radius">
+
+  <button type="submit" [disabled]="!profileForm.valid">Submit</button>
+</form>
+
+<h1>Example</h1>
+<pre>
+  longitude:  38.810009
+  latitude:   41.006277
+  radius:     50
+</pre>

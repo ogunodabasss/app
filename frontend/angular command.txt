@@ -1,0 +1,3 @@
+ng new frontend
+
+npm install -g @angular/google-maps@17.0.0
