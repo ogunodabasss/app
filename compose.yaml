@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  frontend:
+    depends_on:
+      - app
+    container_name: angular
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - 4200:4200
+    volumes:
+      - ./frontend:/usr/app/frontend/src/app
+    command: >
+      bash -c "npm install && ng serve --host 0.0.0.0 --port 4200"
+    networks:
+      - backend_network
+    env_file: ./.env
+    environment:
+      - GOOGLE_API_JS_KEY=$GOOGLE_API_JS_KEY
+
+  postgres_db:
+    container_name: 'postgresql_DB'
+    image: postgres:16.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - POSTGRES_DB=$POSTGRESDB_DATABASE
+      - POSTGRES_PASSWORD=$POSTGRESDB_ROOT_PASSWORD
+      - POSTGRES_USER=$POSTGRESDB_USER
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+    networks:
+      - backend_network
+    
+  app:
+    depends_on:
+      - postgres_db
+    container_name: 'SpringBackendAPP'
+    image: 'app_backend:latest'
+    build:
+      dockerfile: Dockerfile
+      context: ./backend
+    restart: 'no'
+    env_file: ./.env
+    ports:
+      - "8070:8070"
+    stdin_open: true
+    tty: true
+    networks:
+      - backend_network
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - google.api.key=$GOOGLE_API_KEY
+     # - "JDK_JAVA_OPTIONS=--add-opens java.base/java.lang=ALL-UNNAMED"
+      - postgresql.url=jdbc:postgresql://postgres_db:5432/$POSTGRESDB_DATABASE
+      - postgresql.username=$POSTGRESDB_USER
+      - postgresql.password=$POSTGRESDB_ROOT_PASSWORD
+    volumes:
+    - /backend:/usr/app/backend
+volumes:
+  postgres_db:
+networks: 
+  backend_network:
+    driver: bridge
